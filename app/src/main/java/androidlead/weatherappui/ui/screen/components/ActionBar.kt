@@ -1,31 +1,17 @@
+// Improved ActionBar.kt with dynamic location support
 package androidlead.weatherappui.ui.screen.components
 
 import androidlead.weatherappui.R
-import androidlead.weatherappui.ui.theme.ColorGradient1
-import androidlead.weatherappui.ui.theme.ColorGradient2
-import androidlead.weatherappui.ui.theme.ColorGradient3
-import androidlead.weatherappui.ui.theme.ColorImageShadow
-import androidlead.weatherappui.ui.theme.ColorSurface
-import androidlead.weatherappui.ui.theme.ColorTextPrimary
-import androidlead.weatherappui.ui.theme.ColorTextSecondary
+import androidlead.weatherappui.ui.theme.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,25 +24,34 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ActionBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    location: String = "Loading...",
+    isUpdating: Boolean = false,
+    onLocationClick: () -> Unit = {},
+    onMenuClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {}
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        ControlButton()
+        ControlButton(onClick = onMenuClick)
         LocationInfo(
-            modifier = Modifier.padding(top = 10.dp),
-            location = "Rome"
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .clickable { onLocationClick() },
+            location = location,
+            isUpdating = isUpdating
         )
-        ProfileButton()
+        ProfileButton(onClick = onProfileClick)
     }
 }
 
 @Composable
 private fun ControlButton(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Surface(
         color = ColorSurface,
@@ -69,7 +64,8 @@ private fun ControlButton(
                 shadowRadius = 16.dp,
                 borderRadius = 48.dp,
                 offsetY = 4.dp
-            ),
+            )
+            .clickable { onClick() },
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -77,7 +73,7 @@ private fun ControlButton(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_control),
-                contentDescription = null,
+                contentDescription = "Menu",
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -86,7 +82,8 @@ private fun ControlButton(
 
 @Composable
 private fun ProfileButton(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -103,10 +100,11 @@ private fun ProfileButton(
                 borderRadius = 48.dp,
                 offsetY = 6.dp
             )
+            .clickable { onClick() }
     ) {
         Image(
             painter = painterResource(id = R.drawable.img_profile),
-            contentDescription = null,
+            contentDescription = "Profile",
             modifier = modifier
                 .fillMaxSize()
                 .clip(CircleShape)
@@ -117,7 +115,8 @@ private fun ProfileButton(
 @Composable
 private fun LocationInfo(
     modifier: Modifier = Modifier,
-    location: String
+    location: String,
+    isUpdating: Boolean = false
 ) {
     Column(
         modifier = modifier,
@@ -141,13 +140,19 @@ private fun LocationInfo(
                 fontWeight = FontWeight.Bold
             )
         }
-        ProgressBar()
+
+        if (isUpdating) {
+            ProgressBar(text = "Updating •")
+        } else {
+            ProgressBar(text = "Tap to refresh")
+        }
     }
 }
 
 @Composable
 private fun ProgressBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    text: String = "Updating •"
 ) {
     Box(
         modifier = modifier
@@ -165,7 +170,7 @@ private fun ProgressBar(
             )
     ) {
         Text(
-            text = "Updating •",
+            text = text,
             style = MaterialTheme.typography.labelSmall,
             color = ColorTextSecondary.copy(alpha = 0.7f)
         )

@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "androidlead.weatherappui"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "androidlead.weatherappui"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -54,7 +54,11 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose.v290)
+    // It's good practice to keep versions consistent,
     implementation(libs.logging.interceptor)
+    implementation(libs.material3)
+    implementation(libs.accompanist.swiperefresh)
     //Compose
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.runtime.livedata)
