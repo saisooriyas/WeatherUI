@@ -1,7 +1,6 @@
 package androidlead.weatherappui.ui.screen.components
 
 import androidlead.weatherappui.R
-import androidlead.weatherappui.ui.screen.util.ForecastData
 import androidlead.weatherappui.ui.screen.util.ForecastItem
 import androidlead.weatherappui.ui.screen.util.fromHex
 import androidlead.weatherappui.ui.theme.ColorGradient1
@@ -48,7 +47,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun WeeklyForecast(
     modifier: Modifier = Modifier,
-    data: List<ForecastItem> = ForecastData
+    data: List<ForecastItem>
 ) {
     Column(
         modifier = modifier,

@@ -51,8 +51,12 @@ android {
 dependencies {
     //AndroidX
     implementation(libs.bundles.androidX)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     //Compose
     implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.runtime.livedata)
     debugImplementation(libs.compose.tooling)
     implementation(libs.bundles.ui)
 }

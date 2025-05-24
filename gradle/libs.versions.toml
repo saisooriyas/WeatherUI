@@ -1,15 +1,20 @@
 [versions]
 agp = "8.5.2"
+converter-gson = "2.9.0"
 kotlin = "1.9.0"
 androidx-core = "1.13.1"
 androidx-runtime = "2.8.4"
 compose-activity = "1.9.1"
 compose-bom = "2024.06.00"
 compose-constrain-layout = "1.0.1"
+lifecycle-viewmodel-ktx = "2.9.0"
+retrofit = "2.9.0"
+runtime-livedata = "1.8.2"
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-runtime" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle-viewmodel-ktx" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
@@ -19,6 +24,9 @@ compose-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-constraint-layout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "compose-constrain-layout" }
 compose-activity = { group = "androidx.activity", name = "activity-compose", version.ref = "compose-activity" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converter-gson" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtime-livedata" }
 
 
 [bundles]
