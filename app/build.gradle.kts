@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.logging.interceptor)
     //Compose
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.runtime.livedata)
