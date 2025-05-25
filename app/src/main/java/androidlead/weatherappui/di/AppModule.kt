@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+
 object AppModule {
 
     fun provideLocationManager(context: Context): AppLocationManager {
