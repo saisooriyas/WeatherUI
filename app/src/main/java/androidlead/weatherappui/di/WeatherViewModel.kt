@@ -35,12 +35,12 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    fun fetchWeather(latitude: Double, longitude: Double, locationName: String? = null) {
+    private fun fetchWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             _weatherState.value = WeatherUiState.Loading
             _isRefreshing.value = true
 
-            locationName?.let { _currentLocation.value = it }
+            //locationName?.let { _currentLocation.value = it }
 
             repository.getCurrentWeather(latitude, longitude)
                 .onSuccess { weather ->
@@ -56,10 +56,10 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
         }
     }
 
-    fun fetchForecast(latitude: Double, longitude: Double) {
+    private fun fetchForecast(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             _forecastState.value = ForecastUiState.Loading
-
+            // _isRefreshing might also be managed here if calls are independent
             repository.getWeatherForecast(latitude, longitude)
                 .onSuccess { forecast ->
                     _forecastState.value = ForecastUiState.Success(forecast)
@@ -69,11 +69,32 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
                         exception.message ?: "Failed to load forecast"
                     )
                 }
+            // _isRefreshing.value = false; // Set after forecast is also done if part of a single refresh op
         }
     }
 
-    fun refreshWeather(latitude: Double, longitude: Double, locationName: String? = null) {
-        fetchWeather(latitude, longitude, locationName)
-        fetchForecast(latitude, longitude)
+    fun refreshWeather(locationData: LocationData) { // Changed parameter to LocationData
+        viewModelScope.launch { // Use a single viewModelScope for the refresh operation
+            _isRefreshing.value = true
+            _currentLocation.value = locationData.cityName // Update location name
+
+            // Fetch weather and forecast concurrently
+            launch {
+                fetchWeather(locationData.latitude, locationData.longitude)
+            }
+            launch {
+                fetchForecast(locationData.latitude, locationData.longitude)
+            }
+            // Add a join or await if you need to ensure both complete before setting _isRefreshing to false
+            // For simplicity, we'll assume they manage their own loading states for now,
+            // and _isRefreshing is for the overall pull-to-refresh action.
+            // If fetchWeather/fetchForecast don't set _isRefreshing, set it here.
+            // Consider when _isRefreshing should become false.
+            // If fetchWeather and fetchForecast manage their own parts of loading,
+            // _isRefreshing might be set to false sooner, or after both complete.
+            // For now, let's assume it's for the overall swipe action:
+            // kotlinx.coroutines.joinAll(job1, job2) // If you assign the launch blocks to jobs
+            _isRefreshing.value = false // Set this after both operations are initiated or completed
+        }
     }
 }

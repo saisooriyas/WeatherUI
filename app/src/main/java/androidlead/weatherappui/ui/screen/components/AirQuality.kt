@@ -25,12 +25,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.random.Random
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -38,6 +41,7 @@ fun AirQuality(
     modifier: Modifier = Modifier,
     data: List<AirQualityItem> = AirQualityData
 ) {
+    val currentData = remember { mutableStateOf(data) }
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
@@ -50,7 +54,13 @@ fun AirQuality(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AirQualityHeader()
+            AirQualityHeader(onRefresh = {
+                currentData.value = currentData.value.map { item ->
+                    item.copy(
+                        value = Random.nextInt(50, 200).toString() // Example: Randomize value
+                    )
+                }
+            })
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -58,7 +68,7 @@ fun AirQuality(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                data.onEach { item ->
+                currentData.value.onEach { item ->
                     AirQualityInfo(
                         data = item,
                         modifier = Modifier.weight(weight = 1f)
@@ -71,7 +81,8 @@ fun AirQuality(
 
 @Composable
 private fun AirQualityHeader(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRefresh: () -> Unit
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -95,13 +106,14 @@ private fun AirQualityHeader(
                 )
             )
         }
-        RefreshButton()
+        RefreshButton(onClick = onRefresh)
     }
 }
 
 @Composable
 private fun RefreshButton(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Surface(
         color = ColorSurface,
@@ -115,10 +127,11 @@ private fun RefreshButton(
                 borderRadius = 32.dp,
                 offsetY = 4.dp
             ),
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_refresh),

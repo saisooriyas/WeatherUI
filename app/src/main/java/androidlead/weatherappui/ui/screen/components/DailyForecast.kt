@@ -98,7 +98,8 @@ fun DailyForecast(
                 end.linkTo(anchor = parent.end, margin = 24.dp)
                 top.linkTo(forecastImage.top)
                 bottom.linkTo(forecastImage.bottom)
-            }
+            },
+            degree = "21",
         )
 
         WindForecastImage(

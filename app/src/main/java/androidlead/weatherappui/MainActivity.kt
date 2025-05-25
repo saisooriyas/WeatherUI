@@ -21,8 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidlead.weatherappui.ui.screen.WeatherScreen
 import androidlead.weatherappui.ui.theme.WeatherAppUiTheme
-// Add these imports to the top of your MainActivity.kt file:
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
