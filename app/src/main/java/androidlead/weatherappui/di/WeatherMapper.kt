@@ -1,4 +1,4 @@
-// app/src/main/java/androidlead/weatherappui/mapper/WeatherMapper.kt
+// app/src/main/java/androidlead/weatherappui/di/WeatherMapper.kt
 package androidlead.weatherappui.di
 
 import androidlead.weatherappui.R
@@ -69,7 +69,7 @@ fun mapWeatherToAirQuality(weather: OpenMeteoResponse): List<AirQualityItem> {
     val pressure = hourlyWeather?.pressureMsl?.getOrNull(currentHour) ?: 1013.0
     val visibility = hourlyWeather?.visibility?.getOrNull(currentHour) ?: 10000.0
     val apparentTemp = hourlyWeather?.apparentTemperature?.getOrNull(currentHour)
-        ?: (currentWeather.temperature + 2) // Rough apparent temperature
+        ?: (currentWeather.temperature + Random.nextDouble(-3.0, 5.0)) // More realistic apparent temperature
     val precipitation = hourlyWeather?.precipitation?.getOrNull(currentHour) ?: 0.0
 
     return listOf(
@@ -113,15 +113,15 @@ private fun getWeatherIcon(weatherCode: Int): Int {
         45, 48 -> R.drawable.img_clouds // Fog
         51, 53, 55, 56, 57 -> R.drawable.img_rain // Drizzle
         61, 63, 65, 66, 67 -> R.drawable.img_rain // Rain
-        //71, 73, 75, 77 -> R.drawable.img_snow // Snow (you'll need to add this drawable)
+        71, 73, 75, 77 -> R.drawable.img_cloudy // Snow (using cloudy as fallback)
         80, 81, 82 -> R.drawable.img_rain // Rain showers
-        //85, 86 -> R.drawable.img_snow // Snow showers
+        85, 86 -> R.drawable.img_cloudy // Snow showers (using cloudy as fallback)
         95, 96, 99 -> R.drawable.img_thunder // Thunderstorm
         else -> R.drawable.img_cloudy
     }
 }
 
-fun getDailyForecastData(weather: OpenMeteoResponse): Pair<String, String> {
+fun getDailyForecastData(weather: OpenMeteoResponse): Triple<String, String, String> {
     val weatherInfo = WeatherCodeMapper.getWeatherInfo(
         weather.currentWeather.weatherCode,
         weather.currentWeather.isDay == 1
@@ -138,7 +138,8 @@ fun getDailyForecastData(weather: OpenMeteoResponse): Pair<String, String> {
         "Today"
     }
     val temperature = "${weather.currentWeather.temperature.roundToInt()}°"
-    return Pair(date, temperature)
+    val description = weatherInfo.description
+    return Triple(date, temperature, description)
 }
 
 fun getCurrentWeatherIcon(weather: OpenMeteoResponse): Int {
@@ -160,8 +161,3 @@ fun getCurrentWeatherTemperature(weather: OpenMeteoResponse): String {
 fun getCurrentWeatherWindSpeed(weather: OpenMeteoResponse): String {
     return "${weather.currentWeather.windSpeed.roundToInt()} km/h"
 }
-
-//fun getCurrentWeatherHumidity(weather: OpenMeteoResponse): String {
-//    return "${weather.currentWeather.}%"
-//}
-

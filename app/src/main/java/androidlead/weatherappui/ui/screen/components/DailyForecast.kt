@@ -38,7 +38,8 @@ import androidx.constraintlayout.compose.Dimension
 fun DailyForecast(
     modifier: Modifier = Modifier,
     forecast: String = "Rain showers",
-    date: String = "Monday, 12 Feb"
+    date: String = "Monday, 12 Feb",
+    temperature: String = "21°"
 ) {
     ConstraintLayout(
         modifier = modifier.fillMaxWidth()
@@ -99,7 +100,7 @@ fun DailyForecast(
                 top.linkTo(forecastImage.top)
                 bottom.linkTo(forecastImage.bottom)
             },
-            degree = "21",
+            degree = temperature.replace("°", ""),
         )
 
         WindForecastImage(

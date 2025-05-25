@@ -25,23 +25,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.random.Random
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AirQuality(
     modifier: Modifier = Modifier,
-    data: List<AirQualityItem> = AirQualityData
+    data: List<AirQualityItem> = AirQualityData,
+    onRefresh: (() -> Unit)? = null
 ) {
-    val currentData = remember { mutableStateOf(data) }
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
@@ -54,13 +51,9 @@ fun AirQuality(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AirQualityHeader(onRefresh = {
-                currentData.value = currentData.value.map { item ->
-                    item.copy(
-                        value = Random.nextInt(50, 200).toString() // Example: Randomize value
-                    )
-                }
-            })
+            AirQualityHeader(
+                onRefresh = onRefresh
+            )
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -68,7 +61,7 @@ fun AirQuality(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                currentData.value.onEach { item ->
+                data.forEach { item ->
                     AirQualityInfo(
                         data = item,
                         modifier = Modifier.weight(weight = 1f)
@@ -82,7 +75,7 @@ fun AirQuality(
 @Composable
 private fun AirQualityHeader(
     modifier: Modifier = Modifier,
-    onRefresh: () -> Unit
+    onRefresh: (() -> Unit)?
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -106,7 +99,10 @@ private fun AirQualityHeader(
                 )
             )
         }
-        RefreshButton(onClick = onRefresh)
+
+        if (onRefresh != null) {
+            RefreshButton(onClick = onRefresh)
+        }
     }
 }
 

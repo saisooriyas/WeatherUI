@@ -1,4 +1,4 @@
-// WeatherScreen.kt - Main screen integrating all components
+// WeatherScreen.kt - Fixed version with proper updates
 package androidlead.weatherappui.ui.screen
 
 import androidlead.weatherappui.di.AppLocationManager
@@ -8,6 +8,7 @@ import androidlead.weatherappui.di.WeatherRepository
 import androidlead.weatherappui.di.WeatherUiState
 import androidlead.weatherappui.di.WeatherViewModel
 import androidlead.weatherappui.di.getCurrentWeatherDescription
+import androidlead.weatherappui.di.getCurrentWeatherTemperature
 import androidlead.weatherappui.di.getDailyForecastData
 import androidlead.weatherappui.di.mapWeatherToAirQuality
 import androidlead.weatherappui.di.mapWeatherToWeeklyForecast
@@ -49,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.background // Required for Modifier.background
+import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 
 @Composable
@@ -86,7 +87,7 @@ fun WeatherScreen(
     SwipeRefresh(
         state = swipeRefreshState,
         onRefresh = {
-            scope.launch { // Launch a coroutine
+            scope.launch {
                 refreshWeatherData(locationManager, viewModel)
             }
         }
@@ -115,18 +116,21 @@ fun WeatherScreen(
                     DailyForecastLoading()
                 }
                 is WeatherUiState.Success -> {
-                    val (date, temperature) = getDailyForecastData((weatherState as WeatherUiState.Success).weather)
+                    val weatherData = (weatherState as WeatherUiState.Success).weather
+                    val (date, temperature, description) = getDailyForecastData(weatherData)
                     DailyForecast(
-                        forecast = getCurrentWeatherDescription((weatherState as WeatherUiState.Success).weather),
-                        date = date
+                        forecast = description,
+                        date = date,
+                        temperature = temperature
                     )
                 }
                 is WeatherUiState.Error -> {
                     ErrorCard(
                         message = "Unable to load current weather",
-                        onRetry = { scope.launch {
-                            refreshWeatherData(locationManager, viewModel)
-                        }
+                        onRetry = {
+                            scope.launch {
+                                refreshWeatherData(locationManager, viewModel)
+                            }
                         }
                     )
                 }
@@ -135,11 +139,25 @@ fun WeatherScreen(
             // Air Quality Section
             when (weatherState) {
                 is WeatherUiState.Success -> {
-                    val airQualityData = mapWeatherToAirQuality((weatherState as WeatherUiState.Success).weather)
-                    AirQuality(data = airQualityData)
+                    val weatherData = (weatherState as WeatherUiState.Success).weather
+                    val airQualityData = mapWeatherToAirQuality(weatherData)
+                    AirQuality(
+                        data = airQualityData,
+                        onRefresh = {
+                            scope.launch {
+                                refreshWeatherData(locationManager, viewModel)
+                            }
+                        }
+                    )
                 }
                 else -> {
-                    AirQuality() // Uses default data
+                    AirQuality(
+                        onRefresh = {
+                            scope.launch {
+                                refreshWeatherData(locationManager, viewModel)
+                            }
+                        }
+                    )
                 }
             }
 
@@ -149,7 +167,8 @@ fun WeatherScreen(
                     WeeklyForecastLoading()
                 }
                 is ForecastUiState.Success -> {
-                    val weeklyData = mapWeatherToWeeklyForecast((forecastState as ForecastUiState.Success).forecast)
+                    val forecastData = (forecastState as ForecastUiState.Success).forecast
+                    val weeklyData = mapWeatherToWeeklyForecast(forecastData)
                     WeeklyForecast(data = weeklyData)
                 }
                 is ForecastUiState.Error -> {
@@ -187,11 +206,10 @@ private fun ActionBarWithLocation(
     onLocationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Assuming ActionBar is your actual component from ui.screen.components
     ActionBar(
         modifier = modifier,
-        location = location, // Pass the location string
-        isUpdating = false, // You might want to get this from viewModel.isRefreshing or a specific location loading state
+        location = location,
+        isUpdating = false,
         onLocationClick = onLocationClick
     )
 }
@@ -275,53 +293,41 @@ private fun LocationPermissionDialog(
 // Helper functions
 private suspend fun initializeWeatherData(
     locationManager: AppLocationManager,
-    viewModel: WeatherViewModel // WeatherViewModel instance
+    viewModel: WeatherViewModel
 ) {
     try {
         locationManager.getCurrentLocation()
             .onSuccess { locationData ->
-                // Use the new refreshWeather that accepts LocationData
                 viewModel.refreshWeather(locationData)
             }
             .onFailure {
-                // Fall back to last known location
                 val lastKnownLocation = locationManager.getLastKnownLocation()
                 if (lastKnownLocation != null) {
                     viewModel.refreshWeather(lastKnownLocation)
                 } else {
-                    // Use default location
-                    val defaultLocation = AppLocationManager.DEFAULT_LOCATIONS.first() // Assuming this exists
-                    viewModel.refreshWeather(defaultLocation) // Pass the default LocationData
+                    val defaultLocation = AppLocationManager.DEFAULT_LOCATIONS.first()
+                    viewModel.refreshWeather(defaultLocation)
                 }
             }
     } catch (e: Exception) {
-        // Use default location as final fallback
         val defaultLocation = AppLocationManager.DEFAULT_LOCATIONS.first()
         viewModel.refreshWeather(defaultLocation)
     }
 }
 
-// WeatherScreen.kt
-
-// ... other imports
-
-// Make this function a suspend function
-private suspend fun refreshWeatherData( // Added suspend keyword
+private suspend fun refreshWeatherData(
     locationManager: AppLocationManager,
     viewModel: WeatherViewModel
 ) {
-    // Try to get fresh location, or use last known
     locationManager.getCurrentLocation()
         .onSuccess { locationData ->
             viewModel.refreshWeather(locationData)
         }
         .onFailure {
-            // Fallback to last known if fresh fails
             val lastKnownLocation = locationManager.getLastKnownLocation()
             if (lastKnownLocation != null) {
                 viewModel.refreshWeather(lastKnownLocation)
             } else {
-                // Use default location as a last resort
                 val defaultLocation = AppLocationManager.DEFAULT_LOCATIONS.first()
                 viewModel.refreshWeather(defaultLocation)
             }
